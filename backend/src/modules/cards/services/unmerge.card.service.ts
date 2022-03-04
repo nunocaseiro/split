@@ -39,12 +39,8 @@ export class UnmergeCardServiceImpl implements UnmergeCardService {
           boardId,
           cardGroupId,
         );
+        console.log(cardGroup);
         if (cardGroup) {
-          const { text, comments, votes: itemVotes } = cardGroup.items[0];
-          const newComments = cardGroup.comments.concat(comments);
-          const newVotes = (cardGroup.votes as unknown as string[]).concat(
-            itemVotes as unknown as string[],
-          );
           // const groupComments = [...cardGroup.comments];
           // groupComments.forEach((comment) => {
           //   comments.push(comment);
@@ -52,7 +48,16 @@ export class UnmergeCardServiceImpl implements UnmergeCardService {
           // const votes = [...cardGroup.votes];
           // itemVotes.forEach((vote) => votes.push(vote));
 
-          if (cardGroup.items.length === 1) {
+          const items = cardGroup.items.filter(
+            (item) => item._id.toString() !== draggedCardId,
+          );
+          if (items.length === 1) {
+            const { text, comments, votes: itemVotes } = items[0];
+            const newComments = cardGroup.comments.concat(comments);
+            const newVotes = (cardGroup.votes as unknown as string[]).concat(
+              itemVotes as unknown as string[],
+            );
+            // console.log(text, newComments, newVotes);
             const updateResult = await this.boardModel
               .updateOne(
                 {
@@ -73,7 +78,8 @@ export class UnmergeCardServiceImpl implements UnmergeCardService {
                   session,
                 },
               )
-              .lean();
+              .lean()
+              .exec();
 
             if (updateResult.modifiedCount !== 1) {
               throw Error(UPDATE_FAILED);
