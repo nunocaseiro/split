@@ -1,23 +1,6 @@
-export const DEFAULT_SERVER_PORT = 3200;
+import { Configuration } from './interfaces/configuration.interface';
 
-interface Configuration {
-  server: {
-    port: number;
-  };
-  database: {
-    uri: string;
-  };
-  jwt: {
-    accessToken: {
-      secret: string;
-      expirationTime: number;
-    };
-    refreshToken: {
-      secret: string;
-      expirationTime: number;
-    };
-  };
-}
+export const DEFAULT_SERVER_PORT = 3200;
 
 export const configuration = (): Configuration => {
   const defaultConfiguration = {
@@ -26,7 +9,7 @@ export const configuration = (): Configuration => {
         parseInt(process.env.SERVER_PORT as string, 10) || DEFAULT_SERVER_PORT,
     },
     database: {
-      uri: `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+      uri: `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=admin&replicaSet=${process.env.DB_REPLICA_SET}&readPreference=primary&directConnection=true&ssl=false`,
     },
     jwt: {
       accessToken: {
@@ -43,6 +26,12 @@ export const configuration = (): Configuration => {
           10,
         ),
       },
+    },
+    azure: {
+      clientId: process.env.AZURE_CLIENT_ID as string,
+      clientSecret: process.env.AZURE_CLIENT_SECRET as string,
+      tenantId: process.env.AZURE_TENANT_ID as string,
+      enabled: process.env.AZURE_ENABLE === 'true',
     },
   };
 

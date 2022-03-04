@@ -1,11 +1,12 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UPDATE_FAILED } from 'src/libs/exceptions/messages';
-import Board, { BoardDocument } from 'src/modules/boards/schemas/board.schema';
+import Board, { BoardDocument } from '../../boards/schemas/board.schema';
 import { GetCardService } from '../interfaces/services/get.card.service.interface';
 import { UpdateCardService } from '../interfaces/services/update.card.service.interface';
-import { TYPES } from '../interfaces/type';
+import { TYPES } from '../interfaces/types';
+import { pullCard } from '../shared/pull.card';
+import { pushCardIntoPosition } from '../shared/push.card';
 
 @Injectable()
 export default class UpdateCardServiceImpl implements UpdateCardService {
@@ -21,59 +22,44 @@ export default class UpdateCardServiceImpl implements UpdateCardService {
     targetColumnId: string,
     newPosition: number,
   ) {
-    const cardToMove = await this.cardService.getCardFromBoard(boardId, cardId);
-    if (cardToMove) {
-      const pullResult = await this.boardModel
-        .updateOne(
-          {
-            _id: boardId,
-            'columns.cards._id': cardId,
-          },
-          {
-            $pull: {
-              'columns.$[].cards': { _id: cardId },
-            },
-          },
-        )
-        .exec();
+    const session = await this.boardModel.db.startSession();
+    session.startTransaction();
+    try {
+      const cardToMove = await this.cardService.getCardFromBoard(
+        boardId,
+        cardId,
+      );
+      if (cardToMove) {
+        await pullCard(boardId, cardId, this.boardModel, session);
 
-      if (pullResult.modifiedCount !== 1) {
-        throw new BadRequestException(UPDATE_FAILED);
+        const pushResult = await pushCardIntoPosition(
+          boardId,
+          targetColumnId,
+          newPosition,
+          cardToMove,
+          this.boardModel,
+          session,
+        );
+
+        await session.commitTransaction();
+        return pushResult;
       }
-
-      const pushResult = await this.boardModel
-        .findOneAndUpdate(
-          {
-            _id: boardId,
-            'columns._id': targetColumnId,
-          },
-          {
-            $push: {
-              'columns.$.cards': {
-                $each: [cardToMove],
-                $position: newPosition,
-              },
-            },
-          },
-          { rawResult: true, new: true },
-        )
-        .exec();
-
-      if (pushResult.lastErrorObject?.updatedExisting && pushResult.value) {
-        return pushResult.value;
-      }
+    } catch (e) {
+      await session.abortTransaction();
+    } finally {
+      await session.endSession();
     }
-    throw new BadRequestException(UPDATE_FAILED);
+    return null;
   }
 
-  async updateCardText(
+  updateCardText(
     boardId: string,
     cardId: string,
     cardItemId: string,
     userId: string,
     text: string,
   ) {
-    const result = await this.boardModel
+    return this.boardModel
       .findOneAndUpdate(
         {
           _id: boardId,
@@ -91,12 +77,33 @@ export default class UpdateCardServiceImpl implements UpdateCardService {
             { 'item._id': cardItemId, 'item.createdBy': userId },
           ],
           new: true,
-          rawResult: true,
         },
       )
-      .exec();
-    if (result.value && result.lastErrorObject?.updatedExisting)
-      return result.value;
-    throw new BadRequestException(UPDATE_FAILED);
+      .lean();
+  }
+
+  updateCardGroupText(
+    boardId: string,
+    cardId: string,
+    userId: string,
+    text: string,
+  ) {
+    return this.boardModel
+      .findOneAndUpdate(
+        {
+          _id: boardId,
+          'columns.cards._id': cardId,
+        },
+        {
+          $set: {
+            'columns.$.cards.$[c].text': text,
+          },
+        },
+        {
+          arrayFilters: [{ 'c._id': cardId, 'c.createdBy': userId }],
+          new: true,
+        },
+      )
+      .lean();
   }
 }

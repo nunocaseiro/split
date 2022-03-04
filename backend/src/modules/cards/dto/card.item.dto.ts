@@ -1,20 +1,28 @@
-import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Transform, TransformFnParams, Type } from 'class-transformer';
-import CommentDto from '../../boards/dto/comment/comment.dto';
+import CommentDto from '../../comments/dto/comment.dto';
 
 export default class CardItemDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  _id!: string;
+  @IsMongoId()
+  _id?: string;
 
   @IsNotEmpty()
   @IsString()
   @Transform(({ value }: TransformFnParams) => value.trim())
   text!: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  createdBy!: string;
+  @IsMongoId()
+  createdBy?: string;
 
   @IsNotEmpty()
   @ValidateNested({ each: true })

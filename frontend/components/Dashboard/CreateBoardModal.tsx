@@ -1,22 +1,23 @@
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircledIcon, Cross1Icon } from "@modulz/radix-icons";
 import { styled } from "../../stitches.config";
 import Text from "../Primitives/Text";
 import {
-  DialogCloseButton,
   DialogContent,
-  DialogContentTitle,
   DialogRoot,
+  DialogCloseButton,
+  DialogContentTitle,
   DialogTrigger,
 } from "../Primitives/Dialog";
-import TextField from "../Primitives/TextField";
-import Button from "../Primitives/Button";
+import Input from "../Primitives/Input";
 import Flex from "../Primitives/Flex";
+import Button from "../Primitives/Button";
 import useBoard from "../../hooks/useBoard";
 import BoardType from "../../types/board/board";
 import SchemaCreateBoard from "../../schema/schemaCreateBoardForm";
+import isEmpty from "../../utils/isEmpty";
 
 const PlusIcon = styled(PlusCircledIcon, {
   size: "$40",
@@ -26,21 +27,27 @@ const PlusIcon = styled(PlusCircledIcon, {
 
 const FooterContainer = styled(Flex);
 
-const StyledForm = styled("form", Flex);
-
-interface CreateBoardModalProps {
+const CreateBoardModal: React.FC<{
   setFetchLoading: (state: boolean) => void;
-}
-
-const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ setFetchLoading }) => {
+}> = ({ setFetchLoading }) => {
   const { createBoard } = useBoard({ autoFetchBoard: false, autoFetchBoards: false });
   const { isLoading, isError } = createBoard;
+
+  const methods = useForm<BoardType>({
+    mode: "onChange",
+    reValidateMode: "onChange",
+    resolver: zodResolver(SchemaCreateBoard),
+  });
+
   const {
-    register,
     handleSubmit,
     formState: { errors },
-  } = useForm<BoardType>({
-    resolver: zodResolver(SchemaCreateBoard),
+    control,
+  } = methods;
+
+  const title = useWatch({
+    control,
+    name: "title",
   });
 
   useEffect(() => {
@@ -69,7 +76,7 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ setFetchLoading }) 
         justify="center"
         direction="column"
       >
-        <Text size="20">Add retro board</Text>
+        <Text>Add retro board</Text>
         <PlusIcon />
       </DialogTrigger>
       <DialogContent
@@ -80,27 +87,25 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ setFetchLoading }) 
         aria-describedby="create-board-modal"
       >
         <DialogContentTitle>New board</DialogContentTitle>
-        <StyledForm direction="column" onSubmit={handleSubmit(handleClick)}>
-          <TextField
-            type="text"
-            placeholder="Board name"
-            css={{ fontSize: "$xl", width: "100%", alignSelf: "center" }}
-            size="2"
-            {...register("title")}
-          />
-          {!!errors.title && (
-            <Text as="p" color="red" noMargin="false">
-              {errors.title.message}
-            </Text>
-          )}
-          <FooterContainer justify="center">
-            <Button type="submit" size="1" color="blue" css={{ width: "20%", mt: "$26" }}>
-              Save
-            </Button>
-          </FooterContainer>
-        </StyledForm>
+        <form onSubmit={handleSubmit(handleClick)}>
+          <FormProvider {...methods}>
+            <Input
+              id="boardName"
+              type="text"
+              value={title ?? ""}
+              state={errors.title ? "error" : isEmpty(title) ? "default" : "valid"}
+              placeholder="Board name"
+              helperText={errors.title?.message}
+            />
+            <FooterContainer justify="center">
+              <Button type="submit" color="blue" css={{ width: "20%", mt: "$26" }}>
+                Save
+              </Button>
+            </FooterContainer>
+          </FormProvider>
+        </form>
         <DialogCloseButton asChild>
-          <Button variant="ghost" size="20">
+          <Button>
             <Cross1Icon />
           </Button>
         </DialogCloseButton>

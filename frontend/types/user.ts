@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { UseMutationResult } from "react-query";
 import { AxiosError } from "axios";
+import { AccessToken, RefreshToken } from "./token";
 import { Nullable } from "./common";
 
 export interface User {
@@ -9,14 +10,14 @@ export interface User {
   email: string;
   password?: string;
   passwordConf?: string;
-  accessToken?: string;
-  accessTokenExpiresIn?: string;
-  refreshToken?: string;
+  accessToken?: AccessToken;
+  refreshToken?: RefreshToken;
 }
 
 export interface UseUserType {
   createUser: UseMutationResult<User, AxiosError, User, unknown>;
   setPw: Dispatch<SetStateAction<string>>;
+  loginAzure: () => Promise<void>;
 }
 
 export interface LoginUser {

@@ -1,0 +1,186 @@
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Inject,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { CardGroupParams } from '../../../libs/dto/param/card.group.params';
+import { CardItemParams } from '../../../libs/dto/param/card.item.params';
+import { CommentGroupParams } from '../../../libs/dto/param/comment.group.params';
+import { CommentItemParams } from '../../../libs/dto/param/comment.item.params';
+import {
+  DELETE_FAILED,
+  INSERT_FAILED,
+  UPDATE_FAILED,
+} from '../../../libs/exceptions/messages';
+import JwtAuthenticationGuard from '../../../libs/guards/jwtAuth.guard';
+import RequestWithUser from '../../../libs/interfaces/requestWithUser.interface';
+import SocketGateway from '../../socket/gateway/socket.gateway';
+import CreateCommentDto from '../dto/create.comment.dto';
+import DeleteCommentDto from '../dto/delete.comment.dto';
+import UpdateCardCommentDto from '../dto/update.comment.dto';
+import { CreateCommentApplication } from '../interfaces/applications/create.comment.application.interface';
+import { DeleteCommentApplication } from '../interfaces/applications/delete.comment.application.interface';
+import { UpdateCommentApplication } from '../interfaces/applications/update.comment.application.interface';
+import { TYPES } from '../interfaces/types';
+
+@Controller('boards')
+export default class CommentsController {
+  constructor(
+    @Inject(TYPES.applications.CreateCommentApplication)
+    private createCommentApp: CreateCommentApplication,
+    @Inject(TYPES.applications.UpdateCommentApplication)
+    private updateCommentApp: UpdateCommentApplication,
+    @Inject(TYPES.applications.DeleteCommentApplication)
+    private deleteCommentApp: DeleteCommentApplication,
+    private socketService: SocketGateway,
+  ) {}
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Post(':boardId/card/:cardId/items/:itemId/comment')
+  async addCardItemComment(
+    @Req() request: RequestWithUser,
+    @Param()
+    params: CardItemParams,
+    @Body() createCommentDto: CreateCommentDto,
+  ) {
+    const {
+      user: { _id: userId },
+    } = request;
+    const { boardId, cardId, itemId } = params;
+    const { text } = createCommentDto;
+
+    const board = await this.createCommentApp.createCardItemComment(
+      boardId,
+      cardId,
+      itemId,
+      userId,
+      text,
+    );
+    if (!board) throw new BadRequestException(INSERT_FAILED);
+    this.socketService.sendUpdatedBoard(board, createCommentDto.socketId);
+    return board;
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Post(':boardId/card/:cardId/comment')
+  async addCardGroupComment(
+    @Req() request: RequestWithUser,
+    @Param()
+    params: CardGroupParams,
+    @Body() createCommentDto: CreateCommentDto,
+  ) {
+    const {
+      user: { _id: userId },
+    } = request;
+    const { boardId, cardId } = params;
+    const { text } = createCommentDto;
+
+    const board = await this.createCommentApp.createCardGroupComment(
+      boardId,
+      cardId,
+      userId,
+      text,
+    );
+    if (!board) throw new BadRequestException(INSERT_FAILED);
+    this.socketService.sendUpdatedBoard(board, createCommentDto.socketId);
+    return board;
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Put(':boardId/card/:cardId/items/:itemId/comment/:commentId')
+  async updateCardItemComment(
+    @Req() request: RequestWithUser,
+    @Param() params: CommentItemParams,
+    @Body() commentData: UpdateCardCommentDto,
+  ) {
+    const {
+      user: { _id: userId },
+    } = request;
+    const { boardId, cardId, itemId, commentId } = params;
+    const { text } = commentData;
+    const board = await this.updateCommentApp.updateCardItemComment(
+      boardId,
+      cardId,
+      itemId,
+      commentId,
+      userId,
+      text,
+    );
+    if (!board) throw new BadRequestException(UPDATE_FAILED);
+    this.socketService.sendUpdatedBoard(board, commentData.socketId);
+    return board;
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Put(':boardId/card/:cardId/comment/:commentId')
+  async updateCardGroupComment(
+    @Req() request: RequestWithUser,
+    @Param() params: CommentGroupParams,
+    @Body() commentData: UpdateCardCommentDto,
+  ) {
+    const {
+      user: { _id: userId },
+    } = request;
+    const { boardId, cardId, commentId } = params;
+    const { text } = commentData;
+    const board = await this.updateCommentApp.updateCardGroupComment(
+      boardId,
+      cardId,
+      commentId,
+      userId,
+      text,
+    );
+    if (!board) throw new BadRequestException(UPDATE_FAILED);
+    this.socketService.sendUpdatedBoard(board, commentData.socketId);
+    return board;
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Delete(':boardId/card/:cardId/items/:itemId/comment/:commentId')
+  async deleteCardItemComment(
+    @Req() request: RequestWithUser,
+    @Param() params: CommentItemParams,
+    @Body() deleteData: DeleteCommentDto,
+  ) {
+    const {
+      user: { _id: userId },
+    } = request;
+    const { boardId, commentId } = params;
+    const board = await this.deleteCommentApp.deleteCardItemComment(
+      boardId,
+      commentId,
+      userId,
+    );
+    if (!board) throw new BadRequestException(DELETE_FAILED);
+    this.socketService.sendUpdatedBoard(board, deleteData.socketId);
+    return board;
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Delete(':boardId/card/:cardId/comment/:commentId')
+  async deleteCardGroupComment(
+    @Req() request: RequestWithUser,
+    @Param() params: CommentGroupParams,
+    @Body() deleteData: DeleteCommentDto,
+  ) {
+    const {
+      user: { _id: userId },
+    } = request;
+    const { boardId, commentId } = params;
+    const board = await this.deleteCommentApp.deleteCardGroupComment(
+      boardId,
+      commentId,
+      userId,
+    );
+    if (!board) throw new BadRequestException(DELETE_FAILED);
+    this.socketService.sendUpdatedBoard(board, deleteData.socketId);
+    return board;
+  }
+}

@@ -1,13 +1,12 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { CheckIcon, Cross2Icon } from "@modulz/radix-icons";
 import { styled } from "../../stitches.config";
-import TextField from "../Primitives/TextField";
+import Input from "../Primitives/Input";
 import Button from "../Primitives/Button";
 import useBoard from "../../hooks/useBoard";
 import BoardType from "../../types/board/board";
 import Flex from "../Primitives/Flex";
 import ToastMessage from "../../utils/toast";
-import ClickEvent from "../../types/events/clickEvent";
 
 const ActionButton = styled(Button, {});
 
@@ -23,7 +22,7 @@ const InputTitle: React.FC<InputTitleBoard> = ({ board, onClickEdit, isBoardPage
   const [title, setTitle] = useState("");
   const { updateBoard } = useBoard({ autoFetchBoard: false, autoFetchBoards: false });
 
-  const handleUpdateTitle = (event: ClickEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleUpdateTitle = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     onClickEdit(false);
     if (title.length === 0) {
@@ -38,11 +37,11 @@ const InputTitle: React.FC<InputTitleBoard> = ({ board, onClickEdit, isBoardPage
     }
   };
 
-  const handleStopPropagationOnTextField = (event: ClickEvent<HTMLInputElement, MouseEvent>) => {
+  const handleStopPropagationOnTextField = (event: React.MouseEvent<HTMLInputElement>) => {
     event.stopPropagation();
   };
 
-  const handleCancelEdit = (event: ClickEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleCancelEdit = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onClickEdit(false);
   };
@@ -54,14 +53,7 @@ const InputTitle: React.FC<InputTitleBoard> = ({ board, onClickEdit, isBoardPage
         e.stopPropagation();
       }}
     >
-      <TextField
-        css={{
-          pointerEvents: "all",
-          width: "100%",
-          border: "none",
-          outline: "none",
-          "&:focus": { outline: "none", border: "none", boxShadow: "none" },
-        }}
+      <Input
         placeholder={board.title}
         autoFocus
         value={title}

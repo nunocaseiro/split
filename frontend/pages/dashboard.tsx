@@ -8,10 +8,19 @@ import Text from "../components/Primitives/Text";
 import { ERROR_LOADING_DATA } from "../utils/constants";
 import useBoard from "../hooks/useBoard";
 import requireAuthentication from "../components/HOC/requireAuthentication";
+import { useRouter } from "next/router";
+import { QueryClient, dehydrate } from "react-query";
+import { getBoardsRequest } from "../api/boardService";
 
 export const getServerSideProps: GetServerSideProps = requireAuthentication(async () => {
+
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery("boards", () => getBoardsRequest());
+
   return {
-    props: {},
+    props: {
+      dehydratedState: dehydrate(queryClient),
+    },
   };
 });
 

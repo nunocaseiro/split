@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { AxiosError } from "axios";
+import nProgress from "nprogress";
 import { signIn } from "next-auth/react";
 import { RedirectableProviderType } from "next-auth/providers";
 import { useMutation } from "react-query";
 import { postUser } from "../api/authService";
 import { LoginUser, User, UseUserType } from "../types/user";
 import { DASHBOARD_ROUTE, ERROR_500_PAGE } from "../utils/routes";
+import { DASHBOARD_PATH } from "../utils/constants";
 
 const useUser = (): UseUserType => {
   const router = useRouter();
@@ -29,7 +31,20 @@ const useUser = (): UseUserType => {
     },
   });
 
-  return { setPw, createUser };
+  const loginAzure = async () => {
+    nProgress.start();
+    const loginResult = await signIn<RedirectableProviderType>("azure-ad", {
+      callbackUrl: DASHBOARD_PATH,
+      redirect: false,
+    });
+    if (!loginResult?.error) {
+      router.push(DASHBOARD_ROUTE);
+    } else {
+      // setLoginError(true);
+    }
+  };
+
+  return { setPw, createUser, loginAzure };
 };
 
 export default useUser;

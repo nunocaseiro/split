@@ -20,10 +20,6 @@ const Circle = styled(Shape, {
   size: "$32",
 });
 
-interface CardBodyProps {
-  board: BoardType;
-}
-
 const handleCols = (columns: ColumnType[]) => {
   return columns.map((column) => {
     const trigger = (
@@ -51,7 +47,7 @@ const handleCols = (columns: ColumnType[]) => {
   });
 };
 
-const CardBody: React.FC<CardBodyProps> = ({ board }) => {
+const CardBody: React.FC<{ board: BoardType }> = ({ board }) => {
   const [showEditTitle, setShowEditTitle] = useState(false);
   return (
     <Link key={board._id} href={{ pathname: `boards/[boardId]`, query: { boardId: board._id } }}>

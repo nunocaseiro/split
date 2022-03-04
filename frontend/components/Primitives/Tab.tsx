@@ -16,7 +16,7 @@ const StyledList = styled(TabsPrimitive.List, {
 
 const StyledTrigger = styled(TabsPrimitive.Trigger, {
   all: "unset",
-  fontFamily: "inherit",
+  fontFamily: "DM Sans",
   backgroundColor: "white",
   padding: "0 20px",
   height: 45,

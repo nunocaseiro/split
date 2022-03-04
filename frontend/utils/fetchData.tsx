@@ -13,10 +13,13 @@ const nonNeededToken = ["/auth/login", "/auth/refresh", "/auth/registerAzure"];
 
 instance.interceptors.request.use(async (config) => {
   const { url, headers } = config;
-  if (url && headers && !nonNeededToken.includes(url)) {
-    const session = await getSession();
-
-    headers.Authorization = `Bearer ${session?.accessToken}`;
+  if (url && headers) {
+    if (!nonNeededToken.includes(url)) {
+      const session = await getSession();
+      if (session) {
+        headers.Authorization = `Bearer ${session?.accessToken}`;
+      }
+    }
   }
 
   return config;
@@ -33,6 +36,14 @@ type Options = {
   token?: string;
   serverSide?: boolean;
 } & AxiosRequestConfig;
+
+export const getHeaderToken = () => {
+  return instance.defaults.headers.common.Authorization;
+};
+
+export const setHeaderToken = (token: string | undefined) => {
+  instance.defaults.headers.common.Authorization = `Bearer ${token}`;
+};
 
 const fetchData = async <T,>(url: string, options?: Options): Promise<T> => {
   const { method = "GET", token, serverSide } = options ?? {};

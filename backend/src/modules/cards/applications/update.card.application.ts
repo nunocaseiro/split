@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { BoardDocument } from 'src/modules/boards/schemas/board.schema';
 import { UpdateCardApplication } from '../interfaces/applications/update.card.application.interface';
 import { UpdateCardService } from '../interfaces/services/update.card.service.interface';
-import { TYPES } from '../interfaces/type';
+import { TYPES } from '../interfaces/types';
 
 @Injectable()
 export class UpdateCardApplicationImpl implements UpdateCardApplication {
@@ -16,7 +15,7 @@ export class UpdateCardApplicationImpl implements UpdateCardApplication {
     cardId: string,
     targetColumnId: string,
     newPosition: number,
-  ): Promise<BoardDocument> {
+  ) {
     return this.updateCardService.updateCardPosition(
       boardId,
       cardId,
@@ -31,11 +30,25 @@ export class UpdateCardApplicationImpl implements UpdateCardApplication {
     cardItemId: string,
     userId: string,
     text: string,
-  ): Promise<BoardDocument> {
+  ) {
     return this.updateCardService.updateCardText(
       boardId,
       cardId,
       cardItemId,
+      userId,
+      text,
+    );
+  }
+
+  updateCardGroupText(
+    boardId: string,
+    cardId: string,
+    userId: string,
+    text: string,
+  ) {
+    return this.updateCardService.updateCardGroupText(
+      boardId,
+      cardId,
       userId,
       text,
     );

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import Board, { BoardDocument } from 'src/modules/boards/schemas/board.schema';
+import { LeanDocument, Model, Types } from 'mongoose';
+import Board, { BoardDocument } from '../../boards/schemas/board.schema';
 import { GetCardService } from '../interfaces/services/get.card.service.interface';
+import { CardDocument } from '../schemas/card.schema';
 
 @Injectable()
 export default class GetCardServiceImpl implements GetCardService {
@@ -46,6 +47,53 @@ export default class GetCardServiceImpl implements GetCardService {
       },
     ]);
 
-    return result.length === 1 ? result[0] : null;
+    return result.length === 1
+      ? (result[0] as LeanDocument<CardDocument>)
+      : null;
+  }
+
+  async getCardItemFromGroup(boardId: string, cardItemId: string) {
+    const result = await this.boardModel.aggregate([
+      {
+        $match: {
+          _id: new Types.ObjectId(boardId),
+          'columns.cards.items._id': new Types.ObjectId(cardItemId),
+        },
+      },
+      {
+        $unwind: {
+          path: '$columns',
+        },
+      },
+      {
+        $unwind: {
+          path: '$columns.cards',
+        },
+      },
+      {
+        $unwind: {
+          path: '$columns.cards.items',
+        },
+      },
+      {
+        $project: {
+          card: '$columns.cards.items',
+          _id: 0,
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: '$card',
+        },
+      },
+      {
+        $match: {
+          _id: new Types.ObjectId(cardItemId),
+        },
+      },
+    ]);
+    return result.length === 1
+      ? (result[0] as LeanDocument<CardDocument>)
+      : null;
   }
 }

@@ -11,6 +11,7 @@ export type CreateColumn = Omit<ColumnType, "_id">;
 
 export interface ColumnBoardType {
   columnId: string;
+  index: number;
   userId: string;
   cards: CardType[];
   boardId: string;

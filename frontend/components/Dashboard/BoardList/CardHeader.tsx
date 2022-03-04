@@ -5,10 +5,9 @@ import Flex from "../../Primitives/Flex";
 import BoardType from "../../../types/board/board";
 import { NEXT_PUBLIC_NEXTAUTH_URL } from "../../../utils/constants";
 import { ROUTES } from "../../../utils/routes";
-import DeleteBoardButton from "./DeleteBoardButton";
 import { EditBoardTitle } from "../../../types/board/editTitle";
+import DeleteBoardButton from "./DeleteBoardButton";
 import Button from "../../Primitives/Button";
-import ClickEvent from "../../../types/events/clickEvent";
 
 const Container = styled(Flex);
 const CopyUrlIcon = styled(CopyIcon, { size: "100%" });
@@ -19,7 +18,7 @@ interface CardHeaderType extends EditBoardTitle {
 }
 
 const CardHeader: React.FC<CardHeaderType> = ({ board, isEditing, onClickEdit }) => {
-  const handleCopyUrl = (event: ClickEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleCopyUrl = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     if (isEditing) onClickEdit(!isEditing);
     if (board._id)
@@ -27,17 +26,17 @@ const CardHeader: React.FC<CardHeaderType> = ({ board, isEditing, onClickEdit })
     ToastMessage("Copied link to clipboard!", "info");
   };
 
-  const handleEditTitle = (event: ClickEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleEditTitle = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     onClickEdit(!isEditing);
   };
 
   return (
     <Container justify="between" css={{ alignSelf: "flex-start", mt: "$4", width: "100%" }}>
-      <Button variant="ghost" size="20" onClick={handleCopyUrl}>
+      <Button css={{ m: 0, p: 2, lineHeight: 0, height: "fit-content" }} onClick={handleCopyUrl}>
         <CopyUrlIcon />
       </Button>
-      <Button variant="ghost" size="20" onClick={handleEditTitle}>
+      <Button css={{ m: 0, p: 2, lineHeight: 0, height: "fit-content" }} onClick={handleEditTitle}>
         <EditIcon />
       </Button>
       <DeleteBoardButton isEditing={isEditing} boardId={board._id} onClickEdit={onClickEdit} />

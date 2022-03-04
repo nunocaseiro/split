@@ -1,6 +1,5 @@
 import { useSession, signOut } from "next-auth/react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { useRouter } from "next/router";
 import { styled } from "../../stitches.config";
 import Flex from "../Primitives/Flex";
 import Label from "../Primitives/Label";
@@ -12,7 +11,6 @@ import {
   slideUpAndFade,
   slideRightAndFade,
 } from "../../animations/Slide";
-import { LANDING_ROUTE } from "../../utils/routes";
 import ToastMessage from "../../utils/toast";
 
 const DropdownMenuContent = styled(DropdownMenu.Content, {
@@ -69,17 +67,14 @@ const Dropdown: React.FC = () => {
   const { data: session } = useSession({
     required: false,
   });
-  const router = useRouter();
 
   const handleSignOut = async () => {
     try {
-      const result = await signOut({
-        callbackUrl: LANDING_ROUTE,
-        redirect: false,
+      const isAzure = session?.strategy === "azure";
+      signOut({
+        callbackUrl: isAzure ? "/logoutAzure" : "/",
+        redirect: true,
       });
-      if (result) {
-        router.push(result.url);
-      }
     } catch (e) {
       ToastMessage("Error signing out", "error");
     }
@@ -89,9 +84,7 @@ const Dropdown: React.FC = () => {
     <DropdownRoot>
       <DropdownMenu.Trigger asChild>
         <DropdownMenuGroup align="center" gap="6">
-          <DropdownLabel fontWeight="medium" size="18">
-            {session?.user?.name ?? "anonymous"}
-          </DropdownLabel>
+          <DropdownLabel>{session?.user?.name ?? "anonymous"}</DropdownLabel>
           <Avatar src={favIcon.src} size={24} />
         </DropdownMenuGroup>
       </DropdownMenu.Trigger>

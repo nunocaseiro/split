@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useMutation, useQuery } from "react-query";
+import { useSession } from "next-auth/react";
 import ToastMessage from "../utils/toast";
 import BoardType from "../types/board/board";
 import {
@@ -12,9 +13,17 @@ import {
   addCardRequest,
   deleteCardRequest,
   updateCardRequest,
+  addCommentRequest,
+  deleteCommentRequest,
+  updateCommentRequest,
+  addVoteRequest,
+  deleteVoteRequest,
+  exchangeCardOfCardGroupRequest,
+  mergeCardsRequest,
+  removeFromMergeRequest,
 } from "../api/boardService";
 import UseBoardType from "../types/board/useBoard";
-import { setChangesBoard } from "../store/slicer/boardSlicer";
+import { decrementVote, incrementVote, setChangesBoard } from "../store/slicer/boardSlicer";
 import { useAppDispatch } from "../store/hooks";
 
 interface AutoFetchProps {
@@ -27,6 +36,9 @@ const useBoard = ({
   autoFetchBoards = false,
 }: AutoFetchProps): UseBoardType => {
   const router = useRouter();
+  const { data: session } = useSession({ required: false });
+  const userId = session?.user.id;
+
   const boardId = String(router.query.boardId);
   const dispatch = useAppDispatch();
   // #region BOARD
@@ -34,6 +46,9 @@ const useBoard = ({
   const fetchBoard = useQuery(["board", { id: boardId }], () => getBoardRequest(boardId), {
     enabled: autoFetchBoard,
     refetchOnWindowFocus: false,
+    onError: () => {
+      ToastMessage("Error getting the board", "error");
+    },
   });
 
   const fetchBoards = useQuery("boards", () => getBoardsRequest(), {
@@ -78,7 +93,7 @@ const useBoard = ({
 
   const addCardInColumn = useMutation(addCardRequest, {
     onSuccess: (board: BoardType) => {
-      dispatch(setChangesBoard(board));
+      dispatch(setChangesBoard({ board, userId }));
     },
     onError: () => {
       fetchBoard.refetch();
@@ -88,7 +103,7 @@ const useBoard = ({
 
   const updateCardPosition = useMutation(updateCardPositionRequest, {
     onSuccess: (board: BoardType) => {
-      dispatch(setChangesBoard(board));
+      dispatch(setChangesBoard({ board, userId }));
     },
     onError: () => {
       fetchBoard.refetch();
@@ -98,7 +113,7 @@ const useBoard = ({
 
   const updateCard = useMutation(updateCardRequest, {
     onSuccess: (board: BoardType) => {
-      dispatch(setChangesBoard(board));
+      dispatch(setChangesBoard({ board, userId }));
     },
     onError: () => {
       fetchBoard.refetch();
@@ -108,11 +123,105 @@ const useBoard = ({
 
   const deleteCard = useMutation(deleteCardRequest, {
     onSuccess: (board: BoardType) => {
-      dispatch(setChangesBoard(board));
+      dispatch(setChangesBoard({ board, userId }));
     },
     onError: () => {
       fetchBoard.refetch();
       ToastMessage("Card not deleted!", "error");
+    },
+  });
+
+  // #endregion
+
+  // #region COMMENT
+
+  const addCommentInCard = useMutation(addCommentRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Comment not inserted!", "error");
+    },
+  });
+
+  const deleteComment = useMutation(deleteCommentRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Comment not deleted!", "error");
+    },
+  });
+
+  const updateComment = useMutation(updateCommentRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Comment not updated!", "error");
+    },
+  });
+
+  // #endregion
+
+  // #region MERGE_CARDS
+
+  const mergeCards = useMutation(mergeCardsRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Board not updated!", "error");
+    },
+  });
+
+  const removeFromMergeCard = useMutation(removeFromMergeRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Board not updated!", "error");
+    },
+  });
+
+  const exchangeCardOfCardGroup = useMutation(exchangeCardOfCardGroupRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Board not updated!", "error");
+    },
+  });
+
+  // #endregion
+
+  // #region VOTES
+
+  const addVote = useMutation(addVoteRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(incrementVote());
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Vote not inserted!", "error");
+    },
+  });
+
+  const deleteVote = useMutation(deleteVoteRequest, {
+    onSuccess: (board: BoardType) => {
+      dispatch(decrementVote());
+      dispatch(setChangesBoard({ board, userId }));
+    },
+    onError: () => {
+      fetchBoard.refetch();
+      ToastMessage("Vote not deleted!", "error");
     },
   });
 
@@ -128,6 +237,14 @@ const useBoard = ({
     updateCard,
     deleteCard,
     updateCardPosition,
+    addCommentInCard,
+    updateComment,
+    deleteComment,
+    addVote,
+    deleteVote,
+    mergeCards,
+    removeFromMergeCard,
+    exchangeCardOfCardGroup,
   };
 };
 

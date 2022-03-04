@@ -1,0 +1,118 @@
+import { CheckIcon } from "@modulz/radix-icons";
+import React, { Dispatch, SetStateAction, useState, useRef } from "react";
+import { createPortal } from "react-dom";
+import { styled } from "../../../stitches.config";
+import Comment from "../Comment/Comment";
+import Flex from "../../Primitives/Flex";
+import useBoard from "../../../hooks/useBoard";
+import AddCommentDto from "../../../types/comment/addComment.dto";
+import useOnClickOutside from "../../../hooks/useOnClickOutside";
+import CardType from "../../../types/card/card";
+import { getCommentsFromCardGroup } from "../../../helper/board/comments";
+import isEmpty from "../../../utils/isEmpty";
+import TextArea from "../../Primitives/TextArea";
+import Button from "../../Primitives/Button";
+
+const SideBarContent = styled("div", {
+  position: "sticky",
+  top: 0,
+  background: "White",
+});
+
+const StyledCheckIcon = styled(CheckIcon, { size: "$20" });
+
+interface SideBarProps {
+  show: boolean;
+  setShow: Dispatch<SetStateAction<boolean>>;
+  color: string;
+  card: CardType;
+  userId: string;
+  boardId: string;
+  socketId: string;
+}
+
+const SideBard = React.memo<SideBarProps>(
+  ({ show, setShow, card, color, userId, boardId, socketId }) => {
+    const { addCommentInCard } = useBoard({ autoFetchBoard: false, autoFetchBoards: false });
+
+    const cardItemId = card.items && card.items.length === 1 ? card.items[0]._id : undefined;
+    const comments =
+      card.items && card.items.length === 1
+        ? card.items[0].comments
+        : getCommentsFromCardGroup(card);
+
+    const [text, setText] = useState("");
+    const [helperText, setHelperText] = useState<string>("");
+    const ref = useRef<HTMLDivElement>(null);
+    useOnClickOutside(ref, () => setShow(false));
+
+    const addComment = () => {
+      if (boardId) {
+        const changes: AddCommentDto = {
+          boardId,
+          cardItemId,
+          cardId: card._id,
+          socketId,
+          isCardGroup: cardItemId === undefined,
+          text,
+        };
+        addCommentInCard.mutate(changes);
+      }
+    };
+
+    const handleAddComment = () => {
+      if (text?.length > 0) {
+        addComment();
+      } else {
+        setHelperText("Comment text cannot be empty!");
+
+        // ToastMessage("Comment text cannot be empty!", "error");
+      }
+    };
+    if (!show) return null;
+    return createPortal(
+      <SideBarContent
+        ref={ref}
+        css={{
+          borderTop: "2px solid black",
+          borderBottom: "2px solid black",
+          borderLeft: "2px solid black",
+          width: "$400",
+        }}
+      >
+        <Flex direction="column">
+          <TextArea
+            value={text}
+            setCurrentValue={setText}
+            id="AddCommentTextArea"
+            state={isEmpty(helperText) ? "default" : "error"}
+            helperText={helperText}
+            placeholder="Add a comment..."
+          />{" "}
+          <Button css={{ borderTop: "1px solid black" }} color="green" onClick={handleAddComment}>
+            <StyledCheckIcon />
+          </Button>
+          <Flex css={{ borderTop: "1px solid black", p: "$8" }} direction="column">
+            {comments.length > 0 &&
+              comments.map((comment) => (
+                <Comment
+                  key={comment._id}
+                  comment={comment}
+                  color={color}
+                  cardId={card._id}
+                  cardItemId={cardItemId}
+                  userId={userId}
+                  boardId={boardId}
+                  isNested={comment.isNested}
+                  socketId={socketId}
+                />
+              ))}
+          </Flex>
+        </Flex>
+      </SideBarContent>,
+      document.getElementById("sidebar") ?? document.body
+    );
+  }
+);
+
+export default SideBard;

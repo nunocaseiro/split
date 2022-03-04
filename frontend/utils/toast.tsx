@@ -5,11 +5,11 @@ const ToastMessage = (message: string, type: TypeOptions): ReactText =>
   toast(message, {
     type,
     position: "bottom-center",
-    autoClose: 2500,
+    autoClose: 2000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
-    draggable: false,
+    draggable: true,
     progress: undefined,
   });
 

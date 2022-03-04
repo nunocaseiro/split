@@ -7,12 +7,15 @@ import {
   IsOptional,
   IsBoolean,
   IsNumber,
+  ValidateIf,
+  IsMongoId,
 } from 'class-validator';
 import { Transform, TransformFnParams, Type } from 'class-transformer';
 import ColumnDto from './column/column.dto';
 
 export default class BoardDto {
   @IsOptional()
+  @IsMongoId()
   _id?: string;
 
   @IsString()
@@ -31,11 +34,19 @@ export default class BoardDto {
   @IsBoolean()
   isPublic!: boolean;
 
-  @IsOptional()
+  @ValidateIf((o) => o.isPublic === false)
+  @IsNotEmpty()
   @Transform(({ value }: TransformFnParams) => value.trim())
   password?: string;
 
   @IsNotEmpty()
   @IsNumber()
   maxVotes!: number;
+
+  @IsOptional()
+  socketId?: string;
+
+  @IsOptional()
+  @IsMongoId()
+  createdBy?: string;
 }

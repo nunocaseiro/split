@@ -1,4 +1,6 @@
-import { BoardDocument } from 'src/modules/boards/schemas/board.schema';
+import { LeanDocument } from 'mongoose';
+import { QueryBoardDocument } from '../../../../libs/interfaces/query/query.board.interface';
+import { BoardDocument } from '../../../boards/schemas/board.schema';
 
 export interface UpdateCardService {
   updateCardPosition(
@@ -6,12 +8,18 @@ export interface UpdateCardService {
     cardId: string,
     targetColumnId: string,
     newPosition: number,
-  ): Promise<BoardDocument>;
+  ): Promise<LeanDocument<BoardDocument> | null>;
   updateCardText(
     boardId: string,
     cardId: string,
     cardItemId: string,
     userId: string,
     text: string,
-  ): Promise<BoardDocument>;
+  ): QueryBoardDocument;
+  updateCardGroupText(
+    boardId: string,
+    cardId: string,
+    userId: string,
+    text: string,
+  ): QueryBoardDocument;
 }

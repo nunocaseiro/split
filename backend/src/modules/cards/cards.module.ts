@@ -1,19 +1,23 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { mongooseModule } from 'src/infrastructure/database/mongoose.module';
-import SocketModule from '../socket/socket.module';
+import { Module } from '@nestjs/common';
+import { mongooseBoardModule } from '../../infrastructure/database/mongoose.module';
+import { getBoardService } from '../boards/boards.providers';
 import {
   createCardApplication,
   createCardService,
   deleteCardApplication,
   deleteCardService,
   getCardService,
+  mergeCardApplication,
+  mergeCardService,
+  unmergeCardApplication,
+  unmergeCardService,
   updateCardApplication,
   updateCardService,
 } from './cards.providers';
 import CardsController from './controller/cards.controller';
 
 @Module({
-  imports: [mongooseModule, forwardRef(() => SocketModule)],
+  imports: [mongooseBoardModule],
   controllers: [CardsController],
   providers: [
     createCardService,
@@ -24,7 +28,12 @@ import CardsController from './controller/cards.controller';
     createCardApplication,
     updateCardApplication,
     deleteCardApplication,
+    getBoardService,
+    mergeCardApplication,
+    mergeCardService,
+    unmergeCardApplication,
+    unmergeCardService,
   ],
-  exports: [],
+  exports: [getCardService],
 })
 export class CardsModule {}

@@ -1,15 +1,26 @@
 import NextAuth, { Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import AzureADProvider from "next-auth/providers/azure-ad";
 import { JWT } from "next-auth/jwt";
-import { REFRESH_TOKEN_ERROR, SECRET } from "../../../utils/constants";
+import {
+  AUTH_PATH,
+  CLIENTID,
+  CLIENTSECRET,
+  DASHBOARD_PATH,
+  ERROR_500_PAGE,
+  SECRET,
+  TENANTID,
+  UNDEFINED,
+  NEXT_PUBLIC_NEXTAUTH_URL,
+  REFRESH_TOKEN_ERROR,
+} from "../../../utils/constants";
 import { LoginUser, User } from "../../../types/user";
-import { login, refreshToken } from "../../../api/authService";
+import { createOrLoginUserAzure, login, refreshToken } from "../../../api/authService";
 import { Token } from "../../../types/token";
-import { AUTH_ROUTE, DASHBOARD_ROUTE, ERROR_500_PAGE } from "../../../utils/routes";
 
 async function refreshAccessToken(prevToken: JWT) {
   try {
-    const data: Token = await refreshToken(prevToken.refreshToken);
+    const data: Token = await refreshToken(prevToken.refreshToken ?? null);
     return {
       ...prevToken,
       accessToken: data.token,
@@ -23,6 +34,11 @@ async function refreshAccessToken(prevToken: JWT) {
 
 export default NextAuth({
   providers: [
+    AzureADProvider({
+      clientId: CLIENTID ?? UNDEFINED,
+      clientSecret: CLIENTSECRET ?? UNDEFINED,
+      tenantId: TENANTID,
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -40,9 +56,8 @@ export default NextAuth({
             name: data.name,
             email: data.email,
             id: data.id,
-            accessToken: data.accessToken,
-            accessTokenExpiresIn: data.accessTokenExpiresIn,
-            refreshToken: data.refreshToken,
+            accessToken: data.accessToken?.token,
+            refreshToken: data.refreshToken?.token,
           };
           return token;
         }
@@ -59,6 +74,21 @@ export default NextAuth({
     secret: SECRET,
   },
   callbacks: {
+    async signIn({ account, user }) {
+      if (account.provider === "azure-ad") {
+        const { access_token: accessToken } = account;
+        const data = await createOrLoginUserAzure(accessToken ?? "");
+        if (!data) return false;
+        user.name = data.name;
+        user.accessToken = data.accessToken.token;
+        user.accessTokenExpiresIn = data.accessToken.expiresIn;
+        user.refreshToken = data.refreshToken.token;
+        user.email = data.email;
+        user.strategy = "azure";
+        user.id = data.id;
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (account && user) {
         return {
@@ -93,15 +123,17 @@ export default NextAuth({
     },
     redirect({ url, baseUrl }) {
       switch (url) {
-        case DASHBOARD_ROUTE:
+        case DASHBOARD_PATH:
           return `${baseUrl}${url}`;
+        case `/logoutAzure`:
+          return `https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=${NEXT_PUBLIC_NEXTAUTH_URL}`;
         default:
           return url.startsWith(baseUrl) ? url : baseUrl;
       }
     },
   },
   pages: {
-    signIn: AUTH_ROUTE,
+    signIn: AUTH_PATH,
     error: ERROR_500_PAGE,
   },
 });

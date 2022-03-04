@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -17,13 +13,14 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "types": [
-      "jest",
-      "@testing-library/jest-dom",
-      "cypress"
-    ],
+    "types": ["jest", "@testing-library/jest-dom"],
     "typeRoots": ["./types", "./vendor/types"],
-    "incremental": true
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@storybook/theming": ["./types.d.ts"],
+      "@emotion/core": ["./types/index.d.ts"]
+    }
   },
   "include": [
     "next.config.js",
@@ -34,7 +31,5 @@
     "jest.config.js",
     "jest.setup.js"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

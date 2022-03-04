@@ -15,10 +15,8 @@ const Header = styled("header", Flex, {
 const NavBar: React.FC = () => {
   return (
     <Header justify="between" align="center" media="sm">
-      <Link href="/">
-        <Text fontWeight="medium" size="18">
-          Divide & Conquer
-        </Text>
+      <Link href="/dashboard">
+        <Text>Divide & Conquer</Text>
       </Link>
       <Title />
       <Dropdown />

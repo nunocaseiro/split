@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
 
 export default class UserDto {
   @IsNotEmpty()
   @IsString()
+  @IsMongoId()
   _id!: string;
 
   @IsNotEmpty()
@@ -12,4 +13,8 @@ export default class UserDto {
   @IsNotEmpty()
   @IsString()
   email!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  strategy!: string;
 }

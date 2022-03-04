@@ -1,6 +1,5 @@
 import useBoard from "../../../hooks/useBoard";
 import { EditBoardTitle } from "../../../types/board/editTitle";
-import ClickEvent from "../../../types/events/clickEvent";
 import BoardAlertDialog from "../../Board/BoardAlertDialog";
 
 interface EditTitleWithBoardId extends EditBoardTitle {
@@ -10,13 +9,13 @@ interface EditTitleWithBoardId extends EditBoardTitle {
 const DeleteBoardButton: React.FC<EditTitleWithBoardId> = ({ boardId, isEditing, onClickEdit }) => {
   const { deleteBoard } = useBoard({ autoFetchBoard: false, autoFetchBoards: false });
 
-  const handleRemoveBoard = (event: ClickEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleRemoveBoard = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     if (isEditing) onClickEdit(!isEditing);
     deleteBoard.mutate(boardId);
   };
 
-  const handleCloseDialog = (event: ClickEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleCloseDialog = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.stopPropagation();
     if (isEditing) onClickEdit(!isEditing);
   };
