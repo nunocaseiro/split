@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import axios from 'axios';
-import { ConfigService } from '@nestjs/config';
 import jwt_decode from 'jwt-decode';
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserService } from '../../users/interfaces/services/create.user.service.interface';
@@ -23,26 +23,26 @@ export default class AuthAzureServiceImpl implements AuthAzureService {
     private readonly getTokenService: GetTokenAuthService,
     @Inject(TYPES.services.CronAzureService)
     private readonly cronAzureService: CronAzureService,
-    private readonly configService: ConfigService,
   ) {}
 
   async loginOrRegisterAzureToken(azureToken: string) {
-    const decoded: { unique_name: string; email: string; name: string } =
-      jwt_decode(azureToken);
-    const user = await this.getUserService.getByEmail(
-      decoded.email ?? decoded.unique_name,
-    );
-    if (user) {
-      return signIn(user, this.getTokenService, 'azure');
-    }
+    const { unique_name, email, given_name, family_name } = <
+      {
+        unique_name: string;
+        email: string;
+        given_name: string;
+        family_name: string;
+      }
+    >jwt_decode(azureToken);
+    const user = await this.getUserService.getByEmail(email ?? unique_name);
+    if (user) return signIn(user, this.getTokenService, 'azure');
+
     const createdUser = await this.createUserService.create({
-      email: decoded?.email === undefined ? decoded.unique_name : decoded.email,
-      name: decoded?.name ?? 'undefined',
-      password: '',
+      email: email ?? unique_name,
+      name: `${given_name} ${family_name}`,
     });
-    if (createdUser) {
-      return signIn(createdUser, this.getTokenService, 'azure');
-    }
+    if (createdUser) return signIn(createdUser, this.getTokenService, 'azure');
+
     return null;
   }
 
@@ -58,25 +58,13 @@ export default class AuthAzureServiceImpl implements AuthAzureService {
     );
 
     try {
-      const count = data['@odata.count'];
-      for (let i = 0; i < count; i += 1) {
-        const user = data.value[i];
-        if (user.mail && user.mail.toLowerCase() === email.toLowerCase()) {
-          return true;
-        }
-        if (
-          user.displayName &&
-          user.displayName.toLowerCase() === email.toLowerCase()
-        ) {
-          return true;
-        }
-        if (
-          user.userPrincipalName &&
-          user.userPrincipalName.toLowerCase() === email.toLowerCase()
-        ) {
-          return true;
-        }
-      }
+      const user = data.value.find(
+        (userFound: any) =>
+          userFound.mail?.toLowerCase() === email.toLowerCase() ||
+          userFound.displayName?.toLowerCase() === email.toLowerCase() ||
+          userFound.userPrincipalName?.toLowerCase() === email.toLowerCase(),
+      );
+      if (user) return true;
     } catch (error) {
       return false;
     }
