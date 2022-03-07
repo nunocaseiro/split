@@ -46,7 +46,7 @@ const Home: NextPage = () => {
 
         <TextArea placeholder="TextField" state="error" helperText="Text" value="" id="TA" />
 
-        <Select />
+        {/* <Select values={["ola", "bois"]} /> */}
 
         <Checkbox id="c1" label="Label" size="12" checked={"indeterminate"} variant="error" />
       </FormProvider>

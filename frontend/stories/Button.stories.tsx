@@ -59,11 +59,6 @@ Primary.argTypes = {
       disable: true,
     },
   },
-  as: {
-    table: {
-      disable: true,
-    },
-  },
 };
 
 export const TextIcon = TextAndIcon.bind({});
@@ -96,11 +91,6 @@ TextIcon.argTypes = {
       disable: true,
     },
   },
-  as: {
-    table: {
-      disable: true,
-    },
-  },
 };
 
 export const Icon = OnlyIcon.bind({});
@@ -129,11 +119,6 @@ Icon.argTypes = {
     },
   },
   textSize: {
-    table: {
-      disable: true,
-    },
-  },
-  as: {
     table: {
       disable: true,
     },

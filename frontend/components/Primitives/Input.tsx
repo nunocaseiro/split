@@ -1,5 +1,5 @@
 import React from "react";
-import { FieldValues, useFormContext, UseFormReturn, useWatch } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { css } from "@stitches/react";
 import Text from "./Text";
 import { CSS, styled } from "../../stitches.config";
@@ -31,21 +31,13 @@ const StyledInput = styled("input", {
     backgroundColor: "$white",
   },
 
-  "&:-webkit-autofill": {
-    "-webkit-box-shadow": "0 0 0px 1000px white inset",
-    backgroundColor: "$white",
-  },
-  "&:-webkit-autofill:active": {
-    "-webkit-box-shadow": "0 0 0px 1000px white inset",
-    backgroundColor: "$white",
-  },
-  "&:-webkit-autofill:focus": {
+  "&:-webkit-autofill,&:-webkit-autofill:active,&:-webkit-autofill:focus": {
     "-webkit-box-shadow": "0 0 0px 1000px white inset",
     backgroundColor: "$white",
   },
 
   "&:-webkit-autofill::first-line": {
-    color: "$primaryBase",
+    color: "$dangerBase",
     fontFamily: "DM Sans",
     fontSize: "$16",
     fontWeight: "$bold",
@@ -55,18 +47,58 @@ const StyledInput = styled("input", {
 
   display: "flex",
   fontSize: "$16",
-  lineHeight: "$20",
   px: "$16",
-  py: "$16",
   boxShadow: "0",
   border: "1px solid $primary200",
   outline: "none",
   borderRadius: "$4",
+  lineHeight: "$20",
+  pt: "$28",
+  pb: "$8",
   "&::-webkit-input-placeholder": {
     color: "$primary300",
   },
   "&:disabled": {
     backgroundColor: "$primary50",
+  },
+  variants: {
+    variant: {
+      default: {
+        "&:focus": {
+          borderColor: "$primary400",
+          boxShadow: "0px 0px 0px 2px var(--colors-primaryLightest)",
+        },
+      },
+      valid: {
+        borderColor: "$primary700",
+        boxShadow: "0px 0px 0px 2px var(--colors-successLightest)",
+      },
+      error: {
+        borderColor: "$danger700",
+        boxShadow: "0px 0px 0px 2px var(--colors-dangerLightest)",
+      },
+    },
+  },
+  color: "$primaryBase",
+  // '&:[data-state="default"]': {
+  //   "&:focus": {
+  //     borderColor: "$primary400",
+  //     boxShadow: "0px 0px 0px 2px var(--colors-primaryLightest)",
+  //   },
+  // },
+  // '&:[data-state="valid"]': {
+  //   borderColor: "$primary700",
+  //   boxShadow: "0px 0px 0px 2px var(--colors-successLightest)",
+  // },
+  // '&:[data-state="error"]': {
+  //   borderColor: "$danger700",
+  //   boxShadow: "0px 0px 0px 2px var(--colors-dangerLightest)",
+  // },
+  "&::placeholder": {
+    "&:disabled": {
+      color: "$primaryBase",
+    },
+    color: "$primary300",
   },
 });
 
@@ -109,7 +141,7 @@ const Input: React.FC<InputProps> = ({
   } = values;
   const isValueEmpty = isEmpty(values.getValues()[id]);
   const state = errors[`${id}`] ? "error" : isValueEmpty ? "default" : "valid";
-  helperText = errors[`${id}`]?.message;
+  console.log(state);
   return (
     <Flex
       direction="column"
@@ -137,33 +169,32 @@ const Input: React.FC<InputProps> = ({
           placeholder=" "
           disabled={disabled}
           type={type}
+          variant={state}
+          data-state={state}
+          data-icon-position={iconPosition}
           css={{
             height: "$56",
             width: "100%",
-            borderColor: outlineColor[state ?? "default"],
-            boxShadow: boxShadow[state ?? "default"],
-            "&::placeholder": {
-              color: disabled ? "$primaryBase" : "$primary300",
-            },
-            "&:focus": {
-              "[data-state]": "focus",
-              border: outlineFocus[state ?? "default"],
-              boxShadow: boxShadowFocus[state ?? "default"],
-            },
+            // borderColor: outlineColor[state ?? "default"],
+            // boxShadow: boxShadow[state ?? "default"],
+            // "&::placeholder": {
+            //   color: disabled ? "$primaryBase" : "$primary300",
+            // },
+            // "&:focus": {
+            //   "[data-state]": "focus",
+            //   border: outlineFocus[state ?? "default"],
+            //   boxShadow: boxShadowFocus[state ?? "default"],
+            // },
             "&:not(:placeholder-shown) ~ label": {
               transform: `scale(0.875) translateX(${
                 icon && isIconLeft ? "0.5rem" : "0.1rem"
               }) translateY(-0.5rem)`,
             },
-            color: "$primaryBase",
             "&:focus ~ label": {
               transform: `scale(0.875) translateX(${
                 icon && isIconLeft ? "0.5rem" : "0.1rem"
               }) translateY(-0.5rem)`,
             },
-            lineHeight: "$20",
-            pt: "$28",
-            pb: "$8",
             pl: icon && isIconLeft ? "$56" : "$16",
             pr: icon && iconPosition === "right" ? "$56" : "$16",
           }}
@@ -188,30 +219,29 @@ const Input: React.FC<InputProps> = ({
           {placeholder}
         </Text>
       </Flex>
-      {!!helperText && (helperText || state === "error") && (
-        <Flex
-          gap="4"
-          align="center"
+
+      <Flex
+        gap="4"
+        align="center"
+        css={{
+          mt: "$8",
+          "& svg": {
+            height: "$16 !important",
+            width: "$16 !important",
+            color: "$dangerBase",
+          },
+        }}
+      >
+        {state === "error" && <InfoIcon />}
+        <Text
           css={{
-            mt: "$8",
-            "& svg": {
-              height: "$16 !important",
-              width: "$16 !important",
-              color: "$dangerBase",
-            },
+            color: state === "error" ? "$dangerBase" : "$primary300",
           }}
+          hint
         >
-          {state === "error" && <InfoIcon />}
-          <Text
-            css={{
-              color: state === "error" ? "$dangerBase" : "$primary300",
-            }}
-            hint
-          >
-            {helperText}
-          </Text>
-        </Flex>
-      )}
+          {!isEmpty(helperText) ? helperText : errors[`${id}`]?.message}
+        </Text>
+      </Flex>
     </Flex>
   );
 };

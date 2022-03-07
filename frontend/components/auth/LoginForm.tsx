@@ -3,7 +3,7 @@ import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import router from "next/router";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { RedirectableProviderType } from "next-auth/providers";
 import { styled } from "../../stitches.config";
 import msIcon from "../../public/ms.png";
@@ -18,7 +18,6 @@ import SchemaLoginForm from "../../schema/schemaLoginForm";
 import { DASHBOARD_ROUTE } from "../../utils/routes";
 import useUser from "../../hooks/useUser";
 import Input from "../Primitives/Input";
-import isEmpty from "../../utils/isEmpty";
 
 const StyledForm = styled("form", Flex, { width: "100%", justifyItems: "center" });
 

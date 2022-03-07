@@ -47,7 +47,7 @@ const InputWithIcon: ComponentStory<typeof Input> = ({ ...args }: any) => {
   });
   return (
     <FormProvider {...methods}>
-      <Input id="i1" placeholder="" {...args} helperText="" icon={<MagnifyingGlass />} />
+      <Input id="i1" placeholder="" {...args} icon={<MagnifyingGlass />} />
     </FormProvider>
   );
 };
@@ -80,7 +80,6 @@ NoIcon.argTypes = {
   },
   helperText: {
     control: { type: "text" },
-    defaultValue: "This is the help text for this input.",
   },
 };
 
@@ -112,6 +111,5 @@ WithIcon.argTypes = {
   },
   helperText: {
     control: { type: "text" },
-    defaultValue: "This is the help text for this input.",
   },
 };

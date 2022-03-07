@@ -1,15 +1,39 @@
 import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import TextArea from "../components/Primitives/TextArea";
 
 export default {
   title: "TextArea",
   component: TextArea,
+  parameters: {
+    docs: {
+      source: {
+        type: "code",
+      },
+    },
+  },
 } as ComponentMeta<typeof TextArea>;
 
-const TextAreaRegular: ComponentStory<typeof TextArea> = ({ ...args }: any) => (
-  <TextArea id="ta1" placeholder="" value="" {...args} />
-);
+const TextAreaRegular: ComponentStory<typeof TextArea> = ({ ...args }: any) => {
+  const methods = useForm<{ i1: string }>({
+    mode: "onChange",
+    reValidateMode: "onChange",
+    resolver: zodResolver(
+      z.object({
+        ta1: z.string().nonempty("Please insert at least 2 chars.").min(2, "Too short"),
+      })
+    ),
+  });
+  return (
+    <FormProvider {...methods}>
+      <TextArea id="ta1" value="" {...args} />
+    </FormProvider>
+  );
+};
+
 export const Primary = TextAreaRegular.bind({});
 Primary.argTypes = {
   id: {
@@ -17,22 +41,11 @@ Primary.argTypes = {
       disable: true,
     },
   },
-  state: {
-    options: ["default", "valid", "error", "disabled"],
-    control: { type: "select" },
-    defaultValue: "default",
-  },
   placeholder: {
     control: { type: "text" },
     defaultValue: "Placeholder",
   },
-  value: {
-    table: {
-      disable: true,
-    },
-  },
   helperText: {
     control: { type: "text" },
-    defaultValue: "This is the help text for this input.",
   },
 };

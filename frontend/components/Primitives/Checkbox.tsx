@@ -84,7 +84,8 @@ const Checkbox: React.FC<{
   const [currentCheckValue, setCurrentCheckValue] = useState(checked);
 
   const handleCheckedChange = (isChecked: boolean | "indeterminate") => {
-    if (isChecked === true) values?.push(id);
+    if (isChecked) values?.push(id);
+    if (!isChecked || isChecked === "indeterminate") values?.splice(values.indexOf(id), 1);
     setCurrentCheckValue(isChecked);
   };
 

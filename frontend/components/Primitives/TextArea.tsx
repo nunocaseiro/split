@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { styled } from "../../stitches.config";
 import { boxShadow, boxShadowFocus } from "../../styles/colors/box-shadow.colors";
 import { outlineColor, outlineFocus } from "../../styles/colors/outline.colors";
@@ -49,30 +49,25 @@ const StyledTextArea = styled("textarea", {
 
 interface ResizableTextAreaProps {
   id: string;
-  state?: "default" | "valid" | "error" | "disabled";
   placeholder: string;
-  value: string;
   helperText?: string;
+  disabled?: boolean;
 }
 
-const TextArea: React.FC<ResizableTextAreaProps> = ({
-  value,
-  id,
-  state,
-  placeholder,
-  helperText,
-}) => {
+const TextArea: React.FC<ResizableTextAreaProps> = ({ id, placeholder, helperText, disabled }) => {
   TextArea.defaultProps = {
-    state: "default",
-    value: "",
     helperText: undefined,
+    disabled: false,
   };
-  if (state !== "error" && !!helperText) helperText = undefined;
+
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const flexRef = useRef<HTMLDivElement | null>(null);
 
   const values = useFormContext();
   const { ref, ...rest } = values?.register(id) || {};
+
+  const value = useWatch({ name: id, defaultValue: "" });
+
   useEffect(() => {
     if (textareaRef && textareaRef.current) {
       textareaRef.current.value = value;
@@ -81,6 +76,8 @@ const TextArea: React.FC<ResizableTextAreaProps> = ({
       textareaRef.current.style.height = `${scrollHeight === 42 ? 0 : scrollHeight}px`;
     }
   }, [value]);
+  const isValueEmpty = isEmpty(values?.getValues()[id]);
+  const state = isValueEmpty ? "default" : values?.formState?.errors[`${id}`] ? "error" : "valid";
   return (
     <Flex
       ref={flexRef}
@@ -90,7 +87,8 @@ const TextArea: React.FC<ResizableTextAreaProps> = ({
       <Flex>
         <StyledTextArea
           id={id}
-          disabled={state === "disabled"}
+          placeholder=" "
+          disabled={disabled}
           ref={(e) => {
             if (ref) ref(e);
             textareaRef.current = e;
@@ -99,17 +97,20 @@ const TextArea: React.FC<ResizableTextAreaProps> = ({
           css={{
             fontWeight: "normal",
             width: "100%",
-            borderColor: outlineColor[state ?? "default"],
-            boxShadow: boxShadow[state ?? "default"],
+            borderColor: outlineColor[state],
+            boxShadow: boxShadow[state],
             "&::placeholder": {
-              color: state === "disabled" ? "$primaryBase" : "$primary300",
+              color: disabled ? "$primaryBase" : "$primary300",
             },
             "&:focus": {
-              border: outlineFocus[state ?? "default"],
-              boxShadow: boxShadowFocus[state ?? "default"],
+              border: outlineFocus[state],
+              boxShadow: boxShadowFocus[state],
             },
             color: "$primaryBase",
             "&:focus ~ label": {
+              transform: `scale(0.875) translateX(0.115rem) translateY(-0.5rem)`,
+            },
+            "&:not(:placeholder-shown) ~ label": {
               transform: `scale(0.875) translateX(0.115rem) translateY(-0.5rem)`,
             },
             lineHeight: "20px",
@@ -131,9 +132,6 @@ const TextArea: React.FC<ResizableTextAreaProps> = ({
             color: "$primary300",
             position: "absolute",
             pointerEvents: "none",
-            transform: !isEmpty(value)
-              ? `scale(0.875) translateX(0.115rem) translateY(-0.5rem)`
-              : undefined,
             transformOrigin: "0 0",
             transition: "all .2s ease-in-out",
           }}
@@ -141,30 +139,28 @@ const TextArea: React.FC<ResizableTextAreaProps> = ({
           {placeholder}
         </Text>
       </Flex>
-      {!!helperText && state === "error" && (
-        <Flex
-          gap="4"
-          align="center"
+      <Flex
+        gap="4"
+        align="center"
+        css={{
+          mt: "$8",
+          "& svg": {
+            height: "$16 !important",
+            width: "$16 !important",
+            color: "$dangerBase",
+          },
+        }}
+      >
+        {state === "error" && <InfoIcon />}
+        <Text
           css={{
-            mt: "$8",
-            "& svg": {
-              height: "$16 !important",
-              width: "$16 !important",
-              color: "$dangerBase",
-            },
+            color: state === "error" ? "$dangerBase" : "$primary300",
           }}
+          hint
         >
-          {state === "error" && <InfoIcon />}
-          <Text
-            css={{
-              color: state === "error" ? "$dangerBase" : "$primary300",
-            }}
-            hint
-          >
-            {helperText}
-          </Text>
-        </Flex>
-      )}
+          {!isEmpty(helperText) ? helperText : values?.formState?.errors[`${id}`]?.message}
+        </Text>
+      </Flex>
     </Flex>
   );
 };
