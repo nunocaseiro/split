@@ -33,6 +33,7 @@
     "import/no-cycle": "off",
     "no-plusplus": "off",
     "no-nested-ternary": "off",
+    "react/no-array-index-key": "off",
     "import/no-extraneous-dependencies": [
       "error",
       {

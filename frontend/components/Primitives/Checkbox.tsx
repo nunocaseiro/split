@@ -73,7 +73,8 @@ const Checkbox: React.FC<{
   values?: string[];
   disabled?: boolean;
   size: "12" | "16";
-}> = ({ id, label, variant, size, checked, values, disabled }) => {
+  handleChange: (value: string) => void;
+}> = ({ id, label, variant, size, checked, values, disabled, handleChange }) => {
   Checkbox.defaultProps = {
     variant: "default",
     checked: false,
@@ -81,16 +82,17 @@ const Checkbox: React.FC<{
     disabled: false,
   };
 
-  const [currentCheckValue, setCurrentCheckValue] = useState(checked);
+  const [currentCheckValue, setCurrentCheckValue] = useState<boolean | undefined | "indeterminate">(
+    checked
+  );
 
   const handleCheckedChange = (isChecked: boolean | "indeterminate") => {
-    if (isChecked) values?.push(id);
-    if (!isChecked || isChecked === "indeterminate") values?.splice(values.indexOf(id), 1);
+    handleChange(id);
     setCurrentCheckValue(isChecked);
   };
 
   return (
-    <Flex css={{ alignItems: "center", height: "$36", size: "fit-content" }}>
+    <Flex css={{ alignItems: "center", height: "$36", width: "100%" }}>
       <StyledCheckbox
         variant={variant ?? "default"}
         name={id}
@@ -120,7 +122,7 @@ const Checkbox: React.FC<{
           {currentCheckValue === "indeterminate" && <IndeterminateIcon />}
         </CheckboxIndicator>
       </StyledCheckbox>
-      <Text as="label" size="sm" css={{ paddingLeft: "$8" }} htmlFor={id}>
+      <Text as="label" size="sm" css={{ paddingLeft: "$8", width: "100%" }} htmlFor={id}>
         {label}
       </Text>
     </Flex>

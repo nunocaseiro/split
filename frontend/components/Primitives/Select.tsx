@@ -1,35 +1,56 @@
 import React, { useState } from "react";
 import { styled } from "@stitches/react";
-import { violet, mauve, blackA } from "@radix-ui/colors";
+import { violet, mauve } from "@radix-ui/colors";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import Flex from "./Flex";
 import Text from "./Text";
 import Checkbox from "./Checkbox";
-import { boxShadow, boxShadowFocus } from "../../styles/colors/box-shadow.colors";
-import { outlineColor, outlineFocus } from "../../styles/colors/outline.colors";
+import isEmpty from "../../utils/isEmpty";
 
 const StyledTrigger = styled(SelectPrimitive.SelectTrigger, {
   all: "unset",
   alignItems: "center",
-  justifyContent: "center",
+  fontFamily: "DM Sans",
+  display: "flex",
+  justifyContent: "space-between",
   borderRadius: "$4",
   boxSizing: "border-box",
-  pt: "$8",
-  pl: "$16",
+  paddingTop: "$28",
+  paddingBottom: "$8",
+  width: "100%",
+  paddingLeft: "$16",
+  paddingRight: "$16",
   fontSize: "$16",
   lineHeight: "$20",
-  height: 56,
-  gap: 4,
+  height: "$56",
   backgroundColor: "white",
-  color: "White",
+  color: "black",
   border: "1px solid var(--colors-primary200)",
-  "&:focus": { boxShadow: `0 0 0 2px black` },
+  variants: {
+    variant: {
+      default: {
+        "&:focus": {
+          borderColor: "$primary400",
+          boxShadow: "0px 0px 0px 2px var(--colors-primaryLightest)",
+        },
+      },
+      valid: {
+        borderColor: "$success700",
+        boxShadow: "0px 0px 0px 2px var(--colors-successLightest)",
+      },
+      error: {
+        borderColor: "$danger700",
+        boxShadow: "0px 0px 0px 2px var(--colors-dangerLightest)",
+      },
+    },
+  },
 });
 
 const StyledContent = styled(SelectPrimitive.Content, {
   overflow: "hidden",
   backgroundColor: "white",
+  fontFamily: "DM Sans",
   borderRadius: 6,
   boxShadow:
     "0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
@@ -41,26 +62,27 @@ const StyledViewport = styled(SelectPrimitive.Viewport, {
 
 const StyledItem = styled(SelectPrimitive.Item, {
   all: "unset",
-  fontSize: 13,
-  lineHeight: 1,
-  color: violet.violet11,
+  fontSize: "$14",
+  lineHeight: "$20",
+  color: "$black",
   borderRadius: 3,
   display: "flex",
   alignItems: "center",
-  height: 25,
-  padding: "0 35px 0 25px",
+  height: 36,
+  pl: "$16",
+  py: "$8",
   position: "relative",
   userSelect: "none",
-
-  "&[data-disabled]": {
-    color: mauve.mauve8,
-    pointerEvents: "none",
-  },
+  fontFamily: "DM Sans",
 
   "&:focus": {
-    backgroundColor: violet.violet9,
-    color: violet.violet1,
+    backgroundColor: "$black",
+    color: "$white",
   },
+});
+
+const StyledItemText = styled(SelectPrimitive.ItemText, {
+  fontFamily: "DM Sans",
 });
 
 const StyledLabel = styled(SelectPrimitive.Label, {
@@ -99,31 +121,57 @@ const StyledScrollUpButton = styled(SelectPrimitive.ScrollUpButton, scrollButton
 
 const StyledScrollDownButton = styled(SelectPrimitive.ScrollDownButton, scrollButtonStyles);
 
+const StyledIcon = styled(SelectPrimitive.Icon, {
+  "& svg": {
+    height: "$24",
+    width: "$24",
+  },
+  position: "absolute",
+  right: 16,
+  top: 16,
+});
+
+const StyledSelectValue = styled(SelectPrimitive.SelectValue, {
+  fontFamily: "DM Sans",
+});
+
 // Exports
 export const SelectRoot = SelectPrimitive.Root;
 export const SelectTrigger = StyledTrigger;
-export const SelectValue = SelectPrimitive.Value;
-export const SelectIcon = SelectPrimitive.Icon;
+export const SelectValue = StyledSelectValue;
+export const SelectIcon = StyledIcon;
 export const SelectContent = StyledContent;
 export const SelectViewport = StyledViewport;
 export const SelectGroup = SelectPrimitive.Group;
 export const SelectItem = StyledItem;
-export const SelectItemText = SelectPrimitive.ItemText;
+export const SelectItemText = StyledItemText;
 export const SelectItemIndicator = StyledItemIndicator;
 export const SelectLabel = StyledLabel;
 export const SelectSeparator = StyledSeparator;
 export const SelectScrollUpButton = StyledScrollUpButton;
 export const SelectScrollDownButton = StyledScrollDownButton;
 
-const Select: React.FC<{ values: string[]; isCheckBox?: boolean; label: string }> = ({
-  values,
-  isCheckBox,
-  label,
-}) => {
+const Select: React.FC<{
+  variant?: "default" | "valid" | "error";
+  values: string[];
+  isCheckBox?: boolean;
+  label: string;
+}> = ({ variant, values, isCheckBox, label }) => {
   Select.defaultProps = {
     isCheckBox: false,
+    variant: "default",
   };
-  const [currentValue, setCurrentValue] = useState(values[0] ?? "");
+  const [currentValue, setCurrentValue] = useState("empty");
+  const [selectedValues, setSelectedValues] = useState([] as string[]);
+
+  const handleChange = (value: string) => {
+    setSelectedValues((prev) => {
+      if (selectedValues.includes(value)) {
+        return prev.filter((item) => item !== value);
+      }
+      return [...prev, value];
+    });
+  };
 
   const setChangedValue = (val: string) => {
     setCurrentValue(val);
@@ -133,23 +181,19 @@ const Select: React.FC<{ values: string[]; isCheckBox?: boolean; label: string }
     <Flex css={{ position: "relative", width: "100%" }}>
       <SelectRoot value={currentValue} onValueChange={setChangedValue}>
         <SelectTrigger
-          aria-label="Food"
+          variant={variant}
+          aria-label="Options"
           css={{
-            width: "100%",
-            borderColor: outlineColor[state],
-            boxShadow: boxShadow[state],
-            // "&::placeholder": {
-            //   color: disabled ? "$primaryBase" : "$primary300",
-            // },
-            "&:focus": {
-              "[data-state]": "focus",
-              border: outlineFocus[state],
-              boxShadow: boxShadowFocus[state],
+            "&:focus ~ label": {
+              transform:
+                !isEmpty(currentValue) && currentValue !== "empty"
+                  ? `scale(0.875) translateX(0.1rem) translateY(-0.5rem)`
+                  : "scale(1) translateX(0) translateY(0)",
             },
           }}
         >
           <SelectValue />
-          <SelectIcon>
+          <SelectIcon color="black">
             <ChevronDownIcon />
           </SelectIcon>
         </SelectTrigger>
@@ -159,20 +203,32 @@ const Select: React.FC<{ values: string[]; isCheckBox?: boolean; label: string }
           </SelectScrollUpButton>
           <SelectViewport>
             <SelectGroup>
+              <SelectItem css={{ height: isCheckBox ? "0" : "none" }} value="empty">
+                <SelectItemText />
+              </SelectItem>
               {!isCheckBox &&
-                values.map((value) => {
+                values.map((value, index) => {
                   return (
-                    <SelectItem value={value.toLowerCase()}>
+                    <SelectItem key={`${value}${index}`} value={value.toLowerCase()}>
                       <SelectItemText>{value}</SelectItemText>
-                      <SelectItemIndicator>
+                      {/* <SelectItemIndicator>
                         <CheckIcon />
-                      </SelectItemIndicator>
+                      </SelectItemIndicator> */}
                     </SelectItem>
                   );
                 })}
               {isCheckBox &&
-                values.map((value) => {
-                  return <Checkbox id="value" label={value} size="12" />;
+                values.map((value, index) => {
+                  return (
+                    <Checkbox
+                      key={`${value}${index}`}
+                      handleChange={handleChange}
+                      id={value}
+                      checked={selectedValues.includes(value)}
+                      label={value}
+                      size="16"
+                    />
+                  );
                 })}
             </SelectGroup>
           </SelectViewport>
@@ -185,14 +241,21 @@ const Select: React.FC<{ values: string[]; isCheckBox?: boolean; label: string }
         as="label"
         css={{
           fontSize: "$16",
+          // left: 16,
+          // top: 16,
+          top: 0,
+          p: "$16",
           pl: "$17",
-          top: "0",
           lineHeight: "$24",
           color: "$primary300",
           position: "absolute",
           pointerEvents: "none",
           transformOrigin: "0 0",
           transition: "all .2s ease-in-out",
+          transform:
+            !isEmpty(currentValue) && currentValue !== "empty"
+              ? "scale(0.875) translateX(0.1rem) translateY(-0.5rem)"
+              : "scale(1) translateX(0) translateY(0)",
         }}
       >
         {label}

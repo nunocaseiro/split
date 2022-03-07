@@ -70,7 +70,7 @@ const StyledInput = styled("input", {
         },
       },
       valid: {
-        borderColor: "$primary700",
+        borderColor: "$success700",
         boxShadow: "0px 0px 0px 2px var(--colors-successLightest)",
       },
       error: {
@@ -80,20 +80,6 @@ const StyledInput = styled("input", {
     },
   },
   color: "$primaryBase",
-  // '&:[data-state="default"]': {
-  //   "&:focus": {
-  //     borderColor: "$primary400",
-  //     boxShadow: "0px 0px 0px 2px var(--colors-primaryLightest)",
-  //   },
-  // },
-  // '&:[data-state="valid"]': {
-  //   borderColor: "$primary700",
-  //   boxShadow: "0px 0px 0px 2px var(--colors-successLightest)",
-  // },
-  // '&:[data-state="error"]': {
-  //   borderColor: "$danger700",
-  //   boxShadow: "0px 0px 0px 2px var(--colors-dangerLightest)",
-  // },
   "&::placeholder": {
     "&:disabled": {
       color: "$primaryBase",
@@ -141,7 +127,6 @@ const Input: React.FC<InputProps> = ({
   } = values;
   const isValueEmpty = isEmpty(values.getValues()[id]);
   const state = errors[`${id}`] ? "error" : isValueEmpty ? "default" : "valid";
-  console.log(state);
   return (
     <Flex
       direction="column"
@@ -175,16 +160,6 @@ const Input: React.FC<InputProps> = ({
           css={{
             height: "$56",
             width: "100%",
-            // borderColor: outlineColor[state ?? "default"],
-            // boxShadow: boxShadow[state ?? "default"],
-            // "&::placeholder": {
-            //   color: disabled ? "$primaryBase" : "$primary300",
-            // },
-            // "&:focus": {
-            //   "[data-state]": "focus",
-            //   border: outlineFocus[state ?? "default"],
-            //   boxShadow: boxShadowFocus[state ?? "default"],
-            // },
             "&:not(:placeholder-shown) ~ label": {
               transform: `scale(0.875) translateX(${
                 icon && isIconLeft ? "0.5rem" : "0.1rem"
