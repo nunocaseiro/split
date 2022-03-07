@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { styled } from "@stitches/react";
 import { violet, mauve } from "@radix-ui/colors";
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons";
 import * as SelectPrimitive from "@radix-ui/react-select";
+import { styled } from "../../stitches.config";
 import Flex from "./Flex";
 import Text from "./Text";
 import Checkbox from "./Checkbox";
@@ -62,19 +62,17 @@ const StyledViewport = styled(SelectPrimitive.Viewport, {
 
 const StyledItem = styled(SelectPrimitive.Item, {
   all: "unset",
-  fontSize: "$14",
-  lineHeight: "$20",
   color: "$black",
   borderRadius: 3,
   display: "flex",
   alignItems: "center",
+  fontSize: "$14",
+  lineHeight: "$20",
   height: 36,
-  pl: "$16",
-  py: "$8",
   position: "relative",
   userSelect: "none",
   fontFamily: "DM Sans",
-
+  paddingLeft: "$16",
   "&:focus": {
     backgroundColor: "$black",
     color: "$white",
@@ -94,7 +92,7 @@ const StyledLabel = styled(SelectPrimitive.Label, {
 
 const StyledSeparator = styled(SelectPrimitive.Separator, {
   height: 1,
-  backgroundColor: violet.violet6,
+  backgroundColor: "$primaryLight",
   margin: 5,
 });
 
@@ -184,6 +182,8 @@ const Select: React.FC<{
           variant={variant}
           aria-label="Options"
           css={{
+            color:
+              isEmpty(currentValue) || currentValue === "empty" || isCheckBox ? "white" : "black",
             "&:focus ~ label": {
               transform:
                 !isEmpty(currentValue) && currentValue !== "empty"
@@ -204,8 +204,14 @@ const Select: React.FC<{
           <SelectViewport>
             <SelectGroup>
               <SelectItem css={{ height: isCheckBox ? "0" : "none" }} value="empty">
-                <SelectItemText />
+                <SelectItemText>{!isCheckBox ? "Clear" : ""}</SelectItemText>
               </SelectItem>
+            </SelectGroup>
+            {!isCheckBox && <SelectSeparator />}
+            <SelectGroup>
+              {/* <SelectItem css={{ height: isCheckBox ? "0" : "none" }} value="empty">
+                <SelectItemText>Clear</SelectItemText>
+              </SelectItem> */}
               {!isCheckBox &&
                 values.map((value, index) => {
                   return (

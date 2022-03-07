@@ -12,7 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ShouldRenderNav } from "../../utils/routes";
 import Button from "../Primitives/Button";
 
-const Main = styled("main", Flex, { px: "3vw", py: "$50", height: "100%" });
+const Main = styled("main", Flex);
 
 const Layout: React.FC = ({ children }) => {
   const router = useRouter();

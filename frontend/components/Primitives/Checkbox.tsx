@@ -73,7 +73,7 @@ const Checkbox: React.FC<{
   values?: string[];
   disabled?: boolean;
   size: "12" | "16";
-  handleChange: (value: string) => void;
+  handleChange?: (value: string) => void;
 }> = ({ id, label, variant, size, checked, values, disabled, handleChange }) => {
   Checkbox.defaultProps = {
     variant: "default",
@@ -87,7 +87,7 @@ const Checkbox: React.FC<{
   );
 
   const handleCheckedChange = (isChecked: boolean | "indeterminate") => {
-    handleChange(id);
+    if (handleChange) handleChange(id);
     setCurrentCheckValue(isChecked);
   };
 

@@ -23,4 +23,8 @@ Primary.argTypes = {
     options: ["12", "16"],
     control: { type: "select" },
   },
+  label: {
+    control: { type: "text" },
+    defaultValue: "Label",
+  },
 };

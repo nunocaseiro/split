@@ -87,6 +87,8 @@ export const { styled, css, globalCss, keyframes, getCssText, theme, createTheme
         54: "3.375rem",
         56: "3.5rem",
         57: "3.5625rem",
+        62: "3.875rem",
+        74: "4.625rem",
       },
       sizes: {
         2: "0.125rem",

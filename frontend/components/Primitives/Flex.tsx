@@ -78,6 +78,9 @@ const Flex = styled("div", {
       8: {
         gap: "$8",
       },
+      12: {
+        gap: "$12",
+      },
       16: {
         gap: "$16",
       },
