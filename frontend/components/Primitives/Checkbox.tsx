@@ -70,15 +70,13 @@ const Checkbox: React.FC<{
   id: string;
   variant?: "default" | "error";
   checked?: boolean | "indeterminate";
-  values?: string[];
   disabled?: boolean;
   size: "12" | "16";
   handleChange?: (value: string) => void;
-}> = ({ id, label, variant, size, checked, values, disabled, handleChange }) => {
+}> = ({ id, label, variant, size, checked, disabled, handleChange }) => {
   Checkbox.defaultProps = {
     variant: "default",
     checked: false,
-    values: [],
     disabled: false,
   };
 
@@ -92,7 +90,7 @@ const Checkbox: React.FC<{
   };
 
   return (
-    <Flex css={{ alignItems: "center", height: "$36", width: "100%" }}>
+    <Flex css={{ alignItems: "center", height: "$36", width: "100%", boxSizing: "border-box" }}>
       <StyledCheckbox
         variant={variant ?? "default"}
         name={id}
@@ -107,8 +105,8 @@ const Checkbox: React.FC<{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: `$${size} !important`,
-            height: `$${size} !important`,
+            // width: `$${size} !important`,
+            // height: `$${size} !important`,
             "& svg": {
               width:
                 currentCheckValue === "indeterminate"

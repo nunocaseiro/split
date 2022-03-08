@@ -177,7 +177,7 @@ const Select: React.FC<{
 
   return (
     <Flex css={{ position: "relative", width: "100%" }}>
-      <SelectRoot value={currentValue} onValueChange={setChangedValue}>
+      <SelectRoot defaultValue="empty" value={currentValue} onValueChange={setChangedValue}>
         <SelectTrigger
           variant={variant}
           aria-label="Options"
