@@ -10,7 +10,6 @@ import useBoard from "../../../hooks/useBoard";
 import AddCardDto from "../../../types/card/addCard.dto";
 import { useAppSelector } from "../../../store/hooks";
 import TextArea from "../../Primitives/TextArea";
-import isEmpty from "../../../utils/isEmpty";
 import SchemaTextForm from "../../../schema/schamaTextForm";
 
 const ActionButton = styled(Button, { borderRadius: "$round" });
@@ -96,13 +95,7 @@ const AddCard = React.memo<AddCardProps>(({ colIdx }) => {
       onFocus={() => setIsClicked(true)}
     >
       <FormProvider {...methods}>
-        <TextArea
-          value={text ?? ""}
-          id="text"
-          state={errors.text ? "error" : isEmpty(text) ? "default" : "valid"}
-          helperText={errors.text?.message}
-          placeholder="Add a card..."
-        />
+        <TextArea id="text" helperText={errors.text?.message} placeholder="Add a card..." />
         {isClicked && (
           <Flex justify="end" gap="4" css={{ width: "100%" }}>
             <ActionButton size="sm" color="red" onClick={handleDisableEdit}>

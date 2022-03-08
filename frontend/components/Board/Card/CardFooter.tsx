@@ -77,7 +77,6 @@ const CardFooter = React.memo<FooterProps>(({ boardId, userId, socketId, card })
   return (
     <Flex align="center" justify="end" css={{ mt: "auto" }} gap="6">
       <Button
-        state="primary"
         css={{
           m: 0,
           p: 2,
@@ -89,7 +88,6 @@ const CardFooter = React.memo<FooterProps>(({ boardId, userId, socketId, card })
       </Button>
       <Text>{comments.length}</Text>
       <Button
-        state="primary"
         css={{
           m: 0,
           p: 2,
