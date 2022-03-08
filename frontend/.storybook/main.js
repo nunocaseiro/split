@@ -6,4 +6,7 @@ module.exports = {
     "@storybook/addon-interactions",
   ],
   framework: "@storybook/react",
+  features: {
+    storyStoreV7: true,
+  },
 };

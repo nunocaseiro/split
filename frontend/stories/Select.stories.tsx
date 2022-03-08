@@ -17,4 +17,7 @@ Primary.argTypes = {
       disable: true,
     },
   },
+  label: {
+    defaultValue: "Label",
+  },
 };

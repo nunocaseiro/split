@@ -6,6 +6,12 @@ import MagnifyingGlass from "../components/Primitives/icons/magnifyingGlass";
 export default {
   title: "Button",
   component: Button,
+  args: {
+    label: "Button",
+    variant: "primary",
+    backgroundcolor: "",
+    fontSize: "",
+  },
   parameters: {
     cssprops: {
       "background-color": {
@@ -16,13 +22,21 @@ export default {
   },
 } as ComponentMeta<typeof Button>;
 
-const Text: ComponentStory<typeof Button> = ({ ...args }) => <Button {...args}>Button</Button>;
-const TextAndIcon: ComponentStory<typeof Button> = ({ ...args }) => (
-  <Button id="b1" {...args}>
-    Button
-    <MagnifyingGlass />
-  </Button>
-);
+const Text: ComponentStory<typeof Button> = (args) => <Button {...args}>Button</Button>;
+const TextAndIcon: ComponentStory<typeof Button> = (args) => {
+  console.log(args);
+  return (
+    <Button
+      id="b1"
+      {...args}
+      css={{ backgroundColor: args.backgroundcolor, fontSize: args.fontSize }}
+    >
+      Button
+      <MagnifyingGlass />
+    </Button>
+  );
+};
+
 const OnlyIcon: ComponentStory<typeof Button> = ({ ...args }) => (
   <Button {...args}>
     <MagnifyingGlass />
@@ -31,9 +45,8 @@ const OnlyIcon: ComponentStory<typeof Button> = ({ ...args }) => (
 
 export const Primary = Text.bind({});
 Primary.argTypes = {
-  state: {
+  variant: {
     options: ["primary", "primaryOutline", "light", "lightOutline", "danger", "dangerOutline"],
-    defaultValue: "primary",
     control: { type: "select" },
   },
   size: {
@@ -59,11 +72,14 @@ Primary.argTypes = {
       disable: true,
     },
   },
+  css: {
+    control: { type: "select" },
+  },
 };
 
 export const TextIcon = TextAndIcon.bind({});
 TextIcon.argTypes = {
-  state: {
+  variant: {
     options: ["primary", "primaryOutline", "light", "lightOutline", "danger", "dangerOutline"],
     defaultValue: "primary",
     control: { type: "select" },
@@ -95,7 +111,7 @@ TextIcon.argTypes = {
 
 export const Icon = OnlyIcon.bind({});
 Icon.argTypes = {
-  state: {
+  variant: {
     options: ["primary", "primaryOutline", "light", "lightOutline", "danger", "dangerOutline"],
     defaultValue: "primary",
     control: { type: "select" },

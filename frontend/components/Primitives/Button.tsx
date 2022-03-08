@@ -17,7 +17,7 @@ const StyledButton = styled("button", {
     },
   },
   variants: {
-    state: {
+    variant: {
       primary: {
         color: "white",
         backgroundColor: "$primaryBase",
@@ -224,7 +224,7 @@ const StyledButton = styled("button", {
     },
   ],
   defaultVariants: {
-    state: "primary",
+    variant: "primary",
     size: "md",
   },
 });
